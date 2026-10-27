@@ -53,6 +53,7 @@ import org.fossify.messages.R
 import org.fossify.messages.databases.MessagesDatabase
 import org.fossify.messages.helpers.AttachmentUtils.parseAttachmentNames
 import org.fossify.messages.helpers.Config
+import org.fossify.messages.helpers.ConversationState
 import org.fossify.messages.helpers.FILE_SIZE_NONE
 import org.fossify.messages.helpers.MAX_MESSAGE_LENGTH
 import org.fossify.messages.helpers.MESSAGES_LIMIT
@@ -458,6 +459,13 @@ fun Context.getConversations(
     }
 
     conversations.sortByDescending { it.date }
+
+    // one grouped read instead of a per-row query; only used for avatar tinting, so a failure
+    // here must never break the list
+    runCatching {
+        ConversationState.updateOutgoingThreads(messagesDB.getOutgoingThreadIds())
+    }
+
     return conversations
 }
 

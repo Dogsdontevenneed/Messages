@@ -72,8 +72,14 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Deliberately left off. This build is for personal use on one device, so
+            // obfuscation buys nothing -- and R8 shrinking is the usual source of
+            // "works in debug, crashes in release" bugs, while every test done so far ran
+            // against the debug build. The real reason release is lighter than debug is
+            // debuggable=false triggering full AOT compilation at install time, which has
+            // nothing to do with R8. Turn both back on only if the APK ever ships widely.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

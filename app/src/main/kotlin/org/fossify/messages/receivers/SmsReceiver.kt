@@ -22,6 +22,7 @@ import org.fossify.messages.extensions.messagesDB
 import org.fossify.messages.extensions.shouldUnarchive
 import org.fossify.messages.extensions.showReceivedMessageNotification
 import org.fossify.messages.extensions.updateConversationArchivedStatus
+import org.fossify.messages.helpers.IslandNotifier
 import org.fossify.messages.helpers.ReceiverUtils.isMessageFilteredOut
 import org.fossify.messages.helpers.refreshConversations
 import org.fossify.messages.helpers.refreshMessages
@@ -152,5 +153,8 @@ class SmsReceiver : BroadcastReceiver() {
             threadId = threadId,
             bitmap = bitmap
         )
+
+        // 验证码 / 取件码上岛（Honor 灵动胶囊）
+        runCatching { IslandNotifier.notifyIfCode(context, senderName, body, threadId) }
     }
 }

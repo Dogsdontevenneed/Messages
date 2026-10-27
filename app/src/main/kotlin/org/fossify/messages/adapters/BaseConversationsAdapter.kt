@@ -1,6 +1,7 @@
 package org.fossify.messages.adapters
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.TypedValue
@@ -26,6 +27,8 @@ import org.fossify.messages.activities.SimpleActivity
 import org.fossify.messages.databinding.ItemConversationBinding
 import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.getAllDrafts
+import org.fossify.messages.helpers.AvatarFactory
+import org.fossify.messages.helpers.ConversationState
 import org.fossify.messages.models.Conversation
 
 @Suppress("LeakingThis")
@@ -192,19 +195,26 @@ abstract class BaseConversationsAdapter(
             }
 
             setupBadgeCount(unreadCountBadge, isUnread, conversation.unreadCount)
-            // at group conversations we use an icon as the placeholder, not any letter
-            val placeholder = if (conversation.isGroupConversation) {
-                SimpleContactsHelper(activity).getColoredGroupIcon(conversation.title)
+            // group conversations keep their dedicated icon, everything else gets a generated avatar
+            if (conversation.isGroupConversation) {
+                conversationImage.setImageDrawable(
+                    SimpleContactsHelper(activity).getColoredGroupIcon(conversation.title)
+                )
             } else {
-                null
+                AvatarFactory.into(
+                    imageView = conversationImage,
+                    seed = conversation.phoneNumber,
+                    displayName = conversation.title,
+                    snippet = conversation.snippet,
+                    number = conversation.phoneNumber,
+                    tone = ConversationState.toneFor(
+                        threadId = conversation.threadId,
+                        read = conversation.read,
+                        unreadCount = conversation.unreadCount,
+                        dateSeconds = conversation.date
+                    )
+                )
             }
-
-            SimpleContactsHelper(activity).loadContactImage(
-                path = conversation.photoUri,
-                imageView = conversationImage,
-                placeholderName = conversation.title,
-                placeholderImage = placeholder
-            )
         }
     }
 
@@ -217,8 +227,9 @@ abstract class BaseConversationsAdapter(
                     count == 0 -> ""
                     else -> count.toString()
                 }
-                setTextColor(properPrimaryColor.getContrastColor())
-                background?.applyColorFilter(properPrimaryColor)
+                // matches the attention tint of the avatars, so "unread" reads as one signal
+                setTextColor(Color.WHITE)
+                background?.applyColorFilter(AvatarFactory.ACCENT_ORANGE)
             }
         }
     }

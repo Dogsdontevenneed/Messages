@@ -16,7 +16,6 @@ import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.notificationManager
-import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.messages.R
 import org.fossify.messages.activities.ThreadActivity
@@ -27,8 +26,10 @@ import org.fossify.messages.receivers.DeleteSmsReceiver
 import org.fossify.messages.receivers.DirectReplyReceiver
 import org.fossify.messages.receivers.MarkAsReadReceiver
 
-class NotificationHelper(private val context: Context) {
+// matches the size Android uses for notification large icons, so the gradient is not upscaled
+private const val LARGE_ICON_SIZE = 256
 
+class NotificationHelper(private val context: Context) {
     private val notificationManager = context.notificationManager
     private val soundUri get() = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
     private val user = Person.Builder()
@@ -120,11 +121,16 @@ class NotificationHelper(private val context: Context) {
                 .build()
         }
 
-        val largeIcon = bitmap ?: if (sender != null) {
-            SimpleContactsHelper(context).getContactLetterIcon(sender)
-        } else {
-            null
-        }
+        val largeIcon = AvatarFactory.bitmap(
+            context = context,
+            seed = address,
+            displayName = sender,
+            snippet = body,
+            number = address,
+            sizePx = LARGE_ICON_SIZE,
+            circleSafe = true,
+            tone = AvatarFactory.Tone.ATTENTION
+        )
         val builder = NotificationCompat.Builder(context, notificationChannelId).apply {
             when (context.config.lockScreenVisibilitySetting) {
                 LOCK_SCREEN_SENDER_MESSAGE -> {
@@ -211,7 +217,16 @@ class NotificationHelper(private val context: Context) {
 
         val summaryText =
             String.format(context.getString(R.string.message_sending_error), recipientName)
-        val largeIcon = SimpleContactsHelper(context).getContactLetterIcon(recipientName)
+        val largeIcon = AvatarFactory.bitmap(
+            context = context,
+            seed = recipientName,
+            displayName = recipientName,
+            snippet = null,
+            number = recipientName,
+            sizePx = LARGE_ICON_SIZE,
+            circleSafe = true,
+            tone = AvatarFactory.Tone.ATTENTION
+        )
         val builder = NotificationCompat.Builder(context, notificationChannelId)
             .setContentTitle(context.getString(R.string.message_not_sent_short))
             .setContentText(summaryText)

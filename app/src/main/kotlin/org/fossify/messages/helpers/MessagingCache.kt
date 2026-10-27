@@ -4,7 +4,8 @@ import android.util.LruCache
 import org.fossify.commons.models.SimpleContact
 import org.fossify.messages.models.NamePhoto
 
-private const val CACHE_SIZE = 512
+// this is a resident app: 512 entries of contact objects was never worth the retained heap
+private const val CACHE_SIZE = 128
 
 object MessagingCache {
     val namePhoto = LruCache<String, NamePhoto>(CACHE_SIZE)

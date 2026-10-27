@@ -44,3 +44,12 @@
 -keepclassmembers,allowobfuscation class ezvcard.parameter.* extends ezvcard.parameter.MediaTypeParameter {
     <init>(java.lang.String, java.lang.String, java.lang.String);
 }
+
+# Local additions: island OTP handling and avatar rendering.
+# Nothing here is resolved by name at runtime, so keeping them is not strictly required --
+# but the release build is the only build the user actually runs, a crash there is expensive
+# to diagnose, and these four classes are a few KB. Cheap insurance.
+-keep class org.fossify.messages.helpers.OtpParser { *; }
+-keep class org.fossify.messages.helpers.IslandNotifier { *; }
+-keep class org.fossify.messages.helpers.AvatarFactory { *; }
+-keep class org.fossify.messages.helpers.ConversationState { *; }

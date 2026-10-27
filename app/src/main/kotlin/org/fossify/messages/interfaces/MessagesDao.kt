@@ -38,6 +38,13 @@ interface MessagesDao {
     @Query("SELECT * FROM messages WHERE thread_id = :threadId")
     fun getThreadMessages(threadId: Long): List<Message>
 
+    /**
+     * Threads whose newest message was sent by us. `type = 2` is Telephony.Sms.MESSAGE_TYPE_SENT.
+     * Used only to tint conversation avatars, so a single grouped read is cheaper than a per-row query.
+     */
+    @Query("SELECT m.thread_id FROM messages m WHERE m.id IN (SELECT MAX(id) FROM messages GROUP BY thread_id) AND m.type = 2")
+    fun getOutgoingThreadIds(): List<Long>
+
     @Query("SELECT messages.* FROM messages LEFT OUTER JOIN recycle_bin_messages ON messages.id = recycle_bin_messages.id WHERE recycle_bin_messages.id IS NULL AND thread_id = :threadId")
     fun getNonRecycledThreadMessages(threadId: Long): List<Message>
 

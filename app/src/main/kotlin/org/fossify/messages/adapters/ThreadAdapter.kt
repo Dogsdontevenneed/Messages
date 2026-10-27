@@ -72,6 +72,7 @@ import org.fossify.messages.extensions.isVideoMimeType
 import org.fossify.messages.extensions.launchViewIntent
 import org.fossify.messages.extensions.startContactDetailsIntent
 import org.fossify.messages.extensions.subscriptionManagerCompat
+import org.fossify.messages.helpers.AvatarFactory
 import org.fossify.messages.helpers.EXTRA_VCARD_URI
 import org.fossify.messages.helpers.THREAD_DATE_TIME
 import org.fossify.messages.helpers.THREAD_RECEIVED_MESSAGE
@@ -437,20 +438,13 @@ class ThreadAdapter(
             }
 
             if (!activity.isFinishing && !activity.isDestroyed) {
-                val contactLetterIcon = SimpleContactsHelper(activity).getContactLetterIcon(message.senderName)
-                val placeholder = contactLetterIcon.toDrawable(activity.resources)
-
-                val options = RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .error(placeholder)
-                    .centerCrop()
-
-                Glide.with(activity)
-                    .load(message.senderPhotoUri)
-                    .placeholder(placeholder)
-                    .apply(options)
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(threadMessageSenderPhoto)
+                AvatarFactory.into(
+                    imageView = threadMessageSenderPhoto,
+                    seed = message.senderPhoneNumber,
+                    displayName = message.senderName,
+                    snippet = message.body,
+                    number = message.senderPhoneNumber
+                )
             }
         }
     }

@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
+import com.bumptech.glide.Glide
+import com.bumptech.glide.MemoryCategory
 import org.fossify.commons.FossifyApp
 import org.fossify.commons.extensions.hasPermission
 import org.fossify.commons.helpers.PERMISSION_READ_CONTACTS
@@ -17,6 +19,12 @@ class App : FossifyApp() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // This app renders text, not photos. Glide's default memory cache and bitmap pool are
+        // sized as a fraction of the heap for image-heavy apps; on a resident SMS process that is
+        // pure retained memory for maybe one MMS thumbnail a month.
+        runCatching { Glide.get(this).setMemoryCategory(MemoryCategory.LOW) }
+
         if (hasPermission(PERMISSION_READ_CONTACTS)) {
             listOf(
                 ContactsContract.Contacts.CONTENT_URI,
